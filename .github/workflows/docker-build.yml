@@ -1,0 +1,98 @@
+name: Build Multi-Architecture Docker Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: "Repository name to clone"
+        required: true
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+  ORGANIZATION: beaverhouse
+
+jobs:
+  generate-sha:
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.commit-sha.outputs.sha }}
+    steps:
+      - name: Get short commit SHA
+        id: commit-sha
+        run: echo "sha=$(git rev-parse --short=8 HEAD)" >> $GITHUB_OUTPUT
+
+  build-amd64:
+    runs-on: ubuntu-latest
+    needs: generate-sha
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.repository }}
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_PAT_ORGANIZATION }}
+
+      - name: Build and push AMD64 image
+        run: |
+          SHA=${{ needs.generate-sha.outputs.sha }}
+          docker build -t ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ inputs.repository }}:${SHA}-amd64 .
+          docker push ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ inputs.repository }}:${SHA}-amd64
+
+  build-arm64:
+    runs-on: macos-latest
+    needs: generate-sha
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.repository }}
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_PAT_ORGANIZATION }}
+
+      - name: Build and push ARM64 image
+        run: |
+          SHA=${{ needs.generate-sha.outputs.sha }}
+          docker build -t ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ inputs.repository }}:${SHA}-arm64 .
+          docker push ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ inputs.repository }}:${SHA}-arm64
+
+  create-manifest:
+    runs-on: ubuntu-latest
+    needs: [build-amd64, build-arm64]
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_PAT_ORGANIZATION }}
+
+      - name: Create and push multi-arch manifest
+        run: |
+          SHA=${{ needs.generate-sha.outputs.sha }}
+          docker manifest create ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ inputs.repository }}:${SHA} \
+            ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ inputs.repository }}:${SHA}-amd64 \
+            ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ inputs.repository }}:${SHA}-arm64
+          docker manifest push ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ inputs.repository }}:${SHA}
