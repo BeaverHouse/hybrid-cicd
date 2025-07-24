@@ -2,7 +2,7 @@
 
 NGINX Ingress Controller is used to manage ingress traffic routing for applications deployed on the cluster.
 
-This configuration is deployed via ArgoCD ApplicationSet.
+This configuration is deployed via Argo CD ApplicationSet.
 Currently, it is deployed on the cloud cluster, but it can be deployed on any other environment.
 
 ## Configuration
