@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: oss-cert-manager-applicationset
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - list:
+        elements:
+          - name: cloud
+            project: cloud
+            cluster: cloud-k8s
+  template:
+    metadata:
+      name: "oss-cert-manager-{{ .name }}"
+    spec:
+      project: "{{ .project }}"
+      destination:
+        name: "{{ .cluster }}"
+        namespace: cert-manager
+      sources:
+        - repoURL: https://charts.jetstack.io
+          targetRevision: v1.18.2
+          chart: cert-manager
+        - repoURL: https://github.com/lhu/hybrid-k8s-docker-helm
+          targetRevision: main
+          path: charts/oss-cert-manager/resources
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

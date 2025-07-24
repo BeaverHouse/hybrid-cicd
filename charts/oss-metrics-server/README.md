@@ -7,4 +7,4 @@ Currently, it is deployed on the cloud cluster, but it can be deployed on any ot
 
 ## Configuration
 
-We'll use the default values.yaml file.
+We'll use the default `values.yaml` file.
