@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/BeaverHouse/hybrid-k8s-docker-helm.git
+    repoURL: https://github.com/BeaverHouse/hybrid-cicd.git
     targetRevision: main
     path: charts/oss-argocd/resources
   destination:

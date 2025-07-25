@@ -27,7 +27,7 @@ spec:
             releaseName: "external-dns"
             valueFiles:
               - $values/charts/oss-external-dns/values-{{ .name }}.yaml
-        - repoURL: https://github.com/lhu/hybrid-k8s-docker-helm
+        - repoURL: https://github.com/BeaverHouse/hybrid-cicd.git
           targetRevision: main
           path: charts/oss-external-dns
           ref: values

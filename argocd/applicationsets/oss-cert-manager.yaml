@@ -23,7 +23,7 @@ spec:
         - repoURL: https://charts.jetstack.io
           targetRevision: v1.18.2
           chart: cert-manager
-        - repoURL: https://github.com/lhu/hybrid-k8s-docker-helm
+        - repoURL: https://github.com/BeaverHouse/hybrid-cicd.git
           targetRevision: main
           path: charts/oss-cert-manager/resources
       syncPolicy:

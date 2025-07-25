@@ -24,7 +24,7 @@ spec:
             releaseName: "ingress-nginx"
             valueFiles:
               - $customRepo/charts/oss-ingress-nginx/values.yaml
-        - repoURL: https://github.com/lhu/hybrid-k8s-docker-helm
+        - repoURL: https://github.com/BeaverHouse/hybrid-cicd.git
           targetRevision: main
           ref: customRepo
       destination:
