@@ -26,7 +26,7 @@ spec:
           helm:
             releaseName: "external-dns"
             valueFiles:
-              - $values/charts/oss-external-dns/values-{{ .name }}.yaml
+              - $values/charts/oss-external-dns/values/values-{{ .name }}.yaml
         - repoURL: https://github.com/BeaverHouse/hybrid-cicd.git
           targetRevision: main
           path: charts/oss-external-dns
