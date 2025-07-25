@@ -23,6 +23,11 @@ spec:
         - repoURL: https://charts.jetstack.io
           targetRevision: v1.18.2
           chart: cert-manager
+          helm:
+            releaseName: cert-manager
+            parameters:
+              - name: crds.enabled
+                value: "true"
         - repoURL: https://github.com/BeaverHouse/hybrid-cicd.git
           targetRevision: main
           path: charts/oss-cert-manager/resources
