@@ -75,16 +75,16 @@ ingress:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
-    external-dns.alpha.kubernetes.io/hostname: "v1-test.haulrest.me"
+    external-dns.alpha.kubernetes.io/hostname: "v1.api.haulrest.me"
   hosts:
-    - host: v1-test.haulrest.me
+    - host: v1.api.haulrest.me
       paths:
         - path: /aecheck
           pathType: Prefix
   tls:
     - secretName: aecheck-backend-tls
       hosts:
-        - v1-test.haulrest.me
+        - v1.api.haulrest.me
 
 # Custom deployment configuration for environment variables
 envFrom:
