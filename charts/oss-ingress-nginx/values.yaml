@@ -2,7 +2,6 @@ controller:
   kind: DaemonSet
   service:
     externalTrafficPolicy: Cluster
-    enableHttp: false
     ports:
       http: 80
       https: 443
