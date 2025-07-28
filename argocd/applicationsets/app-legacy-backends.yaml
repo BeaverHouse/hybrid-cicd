@@ -22,7 +22,6 @@ spec:
       name: "{{ .name }}-legacy"
       labels:
         app.kubernetes.io/name: "{{ .name }}"
-        custom-image: "true"
         app.kubernetes.io/part-of: legacy-backends
     spec:
       project: "{{ .project }}"
@@ -40,5 +39,8 @@ spec:
         automated:
           prune: true
           selfHeal: true
+        managedNamespaceMetadata:
+          labels:
+            custom-image: "true"
         syncOptions:
           - CreateNamespace=true
