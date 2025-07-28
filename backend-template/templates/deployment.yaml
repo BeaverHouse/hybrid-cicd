@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "backend-template.fullname" . }}
+  name: {{ include "<CHARTNAME>.fullname" . }}
   labels:
-    {{- include "backend-template.labels" . | nindent 4 }}
+    {{- include "<CHARTNAME>.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "backend-template.selectorLabels" . | nindent 6 }}
+      {{- include "<CHARTNAME>.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,7 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "backend-template.labels" . | nindent 8 }}
+        {{- include "<CHARTNAME>.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -27,7 +27,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "backend-template.serviceAccountName" . }}
+      serviceAccountName: {{ include "<CHARTNAME>.serviceAccountName" . }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
