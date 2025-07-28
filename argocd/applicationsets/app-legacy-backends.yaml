@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: app-legacy-backends
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - name: aecheck-backend
+        values: aecheck
+      - name: file-server
+        values: file
+  template:
+    metadata:
+      name: '{{name}}'
+      labels:
+        app.kubernetes.io/name: '{{name}}'
+        app.kubernetes.io/part-of: legacy-backends
+    spec:
+      project: home-server
+      source:
+        repoURL: https://github.com/AustinLee/hybrid-k8s-docker-helm
+        targetRevision: HEAD
+        path: charts/app-legacy-backends
+        helm:
+          valueFiles:
+          - values/{{values}}.yaml
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: default
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
