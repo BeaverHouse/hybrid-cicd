@@ -40,4 +40,5 @@ spec:
         automated:
           prune: true
           selfHeal: true
-        # Not creating namespace, because it is already created by the cluster.
+        syncOptions:
+          - CreateNamespace=true
