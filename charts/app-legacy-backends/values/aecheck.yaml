@@ -66,6 +66,26 @@ externalSecret:
       remoteRef:
         key: "SUPABASE_POSTGRES_DBNAME"
 
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-cluster-issuer"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    external-dns.alpha.kubernetes.io/hostname: "v1-test.haulrest.me"
+  hosts:
+    - host: v1-test.haulrest.me
+      paths:
+        - path: /aecheck
+          pathType: Prefix
+  tls:
+    - secretName: aecheck-backend-tls
+      hosts:
+        - v1-test.haulrest.me
+
 # Custom deployment configuration for environment variables
 envFrom:
   - secretRef:
