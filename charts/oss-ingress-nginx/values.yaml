@@ -2,9 +2,12 @@ controller:
   kind: DaemonSet
   service:
     externalTrafficPolicy: Cluster
+    enableHttp: false
     ports:
       http: 80
       https: 443
     targetPorts:
       http: http
       https: http
+    annotations:
+      service.beta.kubernetes.io/vultr-load-balancer-protocol: "https"

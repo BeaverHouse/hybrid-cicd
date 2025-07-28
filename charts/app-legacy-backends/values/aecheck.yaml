@@ -73,9 +73,10 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-cluster-issuer"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
     external-dns.alpha.kubernetes.io/hostname: "v1-test.haulrest.me"
+    service.beta.kubernetes.io/vultr-load-balancer-protocol: "https"
   hosts:
     - host: v1-test.haulrest.me
       paths:
