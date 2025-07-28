@@ -2,20 +2,23 @@ apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: app-legacy-backends
-  namespace: argocd
+  namespace: argo-project
 spec:
   generators:
-  - list:
-      elements:
-      - name: aecheck-backend
-        values: aecheck
-      - name: file-server
-        values: file
+    - list:
+        elements:
+          - name: aecheck-backend
+            valuesFile: aecheck.yaml
+            cluster: cloud-k8s
+          - name: file-server
+            valuesFile: file.yaml
+            cluster: cloud-k8s
   template:
     metadata:
-      name: '{{name}}'
+      name: "{{ .name }}"
       labels:
-        app.kubernetes.io/name: '{{name}}'
+        app.kubernetes.io/name: "{{ .name }}"
+        custom-image: "true"
         app.kubernetes.io/part-of: legacy-backends
     spec:
       project: home-server
@@ -25,13 +28,12 @@ spec:
         path: charts/app-legacy-backends
         helm:
           valueFiles:
-          - values/{{values}}.yaml
+            - values/{{ .valuesFile }}
       destination:
-        server: https://kubernetes.default.svc
-        namespace: default
+        name: "{{ .cluster }}"
+        namespace: legacy-backends
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
-        syncOptions:
-        - CreateNamespace=true
+        # Not creating namespace, because it is already created by the cluster.
