@@ -7,9 +7,15 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
+    - port: {{ .Values.service.api.port }}
+      targetPort: api
       protocol: TCP
-      name: http
+      name: api
+    {{- if .Values.service.mcp.enabled }}
+    - port: {{ .Values.service.mcp.port }}
+      targetPort: mcp
+      protocol: TCP
+      name: mcp
+    {{- end }}
   selector:
     {{- include "backend-template.selectorLabels" . | nindent 4 }}
