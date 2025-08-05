@@ -44,6 +44,9 @@ jobs:
           repository: ${{ env.ORGANIZATION }}/${{ inputs.repository }}
           token: ${{ secrets.GH_PAT_ORGANIZATION }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Log in to Container Registry
         uses: docker/login-action@v3
         with:
@@ -51,12 +54,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GH_PAT_ORGANIZATION }}
 
+      - name: Set organization name
+        id: org-name
+        run: echo "org_lower=$(echo "${{ env.ORGANIZATION }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
       - name: Build and push AMD64 image
-        run: |
-          SHA=${{ needs.generate-sha.outputs.sha }}
-          ORG_LOWER=$(echo "${{ env.ORGANIZATION }}" | tr '[:upper:]' '[:lower:]')
-          docker build -t ${{ env.REGISTRY }}/${ORG_LOWER}/${{ inputs.repository }}:${SHA}-amd64 .
-          docker push ${{ env.REGISTRY }}/${ORG_LOWER}/${{ inputs.repository }}:${SHA}-amd64
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ steps.org-name.outputs.org_lower }}/${{ inputs.repository }}:${{ needs.generate-sha.outputs.sha }}-amd64
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.org-name.outputs.org_lower }}/${{ inputs.repository }}:buildcache-amd64
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ steps.org-name.outputs.org_lower }}/${{ inputs.repository }}:buildcache-amd64,mode=max
 
   build-arm64:
     runs-on: ubuntu-24.04-arm
@@ -72,6 +82,9 @@ jobs:
           repository: ${{ env.ORGANIZATION }}/${{ inputs.repository }}
           token: ${{ secrets.GH_PAT_ORGANIZATION }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Log in to Container Registry
         uses: docker/login-action@v3
         with:
@@ -79,12 +92,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GH_PAT_ORGANIZATION }}
 
+      - name: Set organization name
+        id: org-name
+        run: echo "org_lower=$(echo "${{ env.ORGANIZATION }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
       - name: Build and push ARM64 image
-        run: |
-          SHA=${{ needs.generate-sha.outputs.sha }}
-          ORG_LOWER=$(echo "${{ env.ORGANIZATION }}" | tr '[:upper:]' '[:lower:]')
-          docker build -t ${{ env.REGISTRY }}/${ORG_LOWER}/${{ inputs.repository }}:${SHA}-arm64 .
-          docker push ${{ env.REGISTRY }}/${ORG_LOWER}/${{ inputs.repository }}:${SHA}-arm64
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/arm64
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ steps.org-name.outputs.org_lower }}/${{ inputs.repository }}:${{ needs.generate-sha.outputs.sha }}-arm64
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.org-name.outputs.org_lower }}/${{ inputs.repository }}:buildcache-arm64
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ steps.org-name.outputs.org_lower }}/${{ inputs.repository }}:buildcache-arm64,mode=max
 
   create-manifest:
     runs-on: ubuntu-latest
