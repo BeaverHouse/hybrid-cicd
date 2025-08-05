@@ -59,7 +59,7 @@ jobs:
           docker push ${{ env.REGISTRY }}/${ORG_LOWER}/${{ inputs.repository }}:${SHA}-amd64
 
   build-arm64:
-    runs-on: macos-latest
+    runs-on: ubuntu-24.04-arm
     needs: generate-sha
     permissions:
       contents: read
