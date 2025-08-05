@@ -10,7 +10,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  ORGANIZATION: beaverhouse
+  ORGANIZATION: BeaverHouse
 
 jobs:
   generate-sha:
@@ -33,7 +33,7 @@ jobs:
       - name: Checkout target repository
         uses: actions/checkout@v4
         with:
-          repository: ${{ inputs.repository }}
+          repository: ${{ env.ORGANIZATION }}/${{ inputs.repository }}
 
       - name: Log in to Container Registry
         uses: docker/login-action@v3
@@ -45,8 +45,9 @@ jobs:
       - name: Build and push AMD64 image
         run: |
           SHA=${{ needs.generate-sha.outputs.sha }}
-          docker build -t ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ inputs.repository }}:${SHA}-amd64 .
-          docker push ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ inputs.repository }}:${SHA}-amd64
+          ORG_LOWER=$(echo "${{ env.ORGANIZATION }}" | tr '[:upper:]' '[:lower:]')
+          docker build -t ${{ env.REGISTRY }}/${ORG_LOWER}/${{ inputs.repository }}:${SHA}-amd64 .
+          docker push ${{ env.REGISTRY }}/${ORG_LOWER}/${{ inputs.repository }}:${SHA}-amd64
 
   build-arm64:
     runs-on: macos-latest
@@ -59,7 +60,7 @@ jobs:
       - name: Checkout target repository
         uses: actions/checkout@v4
         with:
-          repository: ${{ inputs.repository }}
+          repository: ${{ env.ORGANIZATION }}/${{ inputs.repository }}
 
       - name: Log in to Container Registry
         uses: docker/login-action@v3
@@ -71,8 +72,9 @@ jobs:
       - name: Build and push ARM64 image
         run: |
           SHA=${{ needs.generate-sha.outputs.sha }}
-          docker build -t ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ inputs.repository }}:${SHA}-arm64 .
-          docker push ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ inputs.repository }}:${SHA}-arm64
+          ORG_LOWER=$(echo "${{ env.ORGANIZATION }}" | tr '[:upper:]' '[:lower:]')
+          docker build -t ${{ env.REGISTRY }}/${ORG_LOWER}/${{ inputs.repository }}:${SHA}-arm64 .
+          docker push ${{ env.REGISTRY }}/${ORG_LOWER}/${{ inputs.repository }}:${SHA}-arm64
 
   create-manifest:
     runs-on: ubuntu-latest
@@ -92,7 +94,8 @@ jobs:
       - name: Create and push multi-arch manifest
         run: |
           SHA=${{ needs.generate-sha.outputs.sha }}
-          docker manifest create ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ inputs.repository }}:${SHA} \
-            ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ inputs.repository }}:${SHA}-amd64 \
-            ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ inputs.repository }}:${SHA}-arm64
-          docker manifest push ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ inputs.repository }}:${SHA}
+          ORG_LOWER=$(echo "${{ env.ORGANIZATION }}" | tr '[:upper:]' '[:lower:]')
+          docker manifest create ${{ env.REGISTRY }}/${ORG_LOWER}/${{ inputs.repository }}:${SHA} \
+            ${{ env.REGISTRY }}/${ORG_LOWER}/${{ inputs.repository }}:${SHA}-amd64 \
+            ${{ env.REGISTRY }}/${ORG_LOWER}/${{ inputs.repository }}:${SHA}-arm64
+          docker manifest push ${{ env.REGISTRY }}/${ORG_LOWER}/${{ inputs.repository }}:${SHA}
