@@ -15,9 +15,16 @@ env:
 jobs:
   generate-sha:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       sha: ${{ steps.commit-sha.outputs.sha }}
     steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.ORGANIZATION }}/${{ inputs.repository }}
+      
       - name: Get short commit SHA
         id: commit-sha
         run: echo "sha=$(git rev-parse --short=8 HEAD)" >> $GITHUB_OUTPUT
