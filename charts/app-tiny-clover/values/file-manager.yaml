@@ -1,0 +1,92 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/beaverhouse/tinyclover-file-manager
+  pullPolicy: IfNotPresent
+  tag: "74bd2a57"
+
+imagePullSecrets:
+  - name: ghcr-secret
+
+nameOverride: "file-manager"
+fullnameOverride: "file-manager"
+
+serviceAccount:
+  create: false
+
+service:
+  type: ClusterIP
+  api:
+    port: 8082
+  mcp:
+    enabled: false
+
+resources:
+  limits:
+    cpu: 50m
+    memory: 256Mi
+  requests:
+    cpu: 10m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+
+# Health check configuration
+livenessProbe:
+  httpGet:
+    path: /file-manager/v1/health
+    port: api
+  periodSeconds: 120
+
+readinessProbe:
+  httpGet:
+    path: /file-manager/v1/health
+    port: api
+  periodSeconds: 120
+
+# ExternalSecret configuration
+externalSecret:
+  enabled: true
+  data:
+    - secretKey: "POSTGRES_HOST"
+      remoteRef:
+        key: "SUPABASE_POSTGRES_HOST"
+    - secretKey: "POSTGRES_PORT"
+      remoteRef:
+        key: "SUPABASE_POSTGRES_PORT"
+    - secretKey: "POSTGRES_USER"
+      remoteRef:
+        key: "SUPABASE_POSTGRES_USER"
+    - secretKey: "POSTGRES_PASSWORD"
+      remoteRef:
+        key: "SUPABASE_POSTGRES_PASSWORD"
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-cluster-issuer"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    external-dns.alpha.kubernetes.io/hostname: "api.tinyclover.com"
+  hosts:
+    - host: api.tinyclover.com
+      paths:
+        - path: /file-manager/v1
+          pathType: Prefix
+  tls:
+    - secretName: file-manager-tls
+      hosts:
+        - api.tinyclover.com
+
+# Custom deployment configuration for environment variables
+envFrom:
+  - secretRef:
+      name: file-manager-secret
+
+extraEnv:
+  - name: GO_ENV
+    value: "production"
