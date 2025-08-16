@@ -1,0 +1,101 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/beaverhouse/tinyclover-llm-client
+  pullPolicy: IfNotPresent
+  tag: "ae43a5fe"
+
+imagePullSecrets:
+  - name: ghcr-secret
+
+nameOverride: "llm-client"
+fullnameOverride: "llm-client"
+
+serviceAccount:
+  create: false
+
+service:
+  type: ClusterIP
+  api:
+    port: 5050
+  mcp:
+    enabled: false
+
+resources:
+  limits:
+    cpu: 50m
+    memory: 256Mi
+  requests:
+    cpu: 10m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+
+# Health check configuration
+livenessProbe:
+  httpGet:
+    path: /v1/health
+    port: api
+  periodSeconds: 120
+
+readinessProbe:
+  httpGet:
+    path: /v1/health
+    port: api
+  periodSeconds: 120
+
+# ExternalSecret configuration
+externalSecret:
+  enabled: true
+  data:
+    - secretKey: "POSTGRES_HOST"
+      remoteRef:
+        key: "SUPABASE_POSTGRES_HOST"
+    - secretKey: "POSTGRES_USER"
+      remoteRef:
+        key: "SUPABASE_POSTGRES_USER"
+    - secretKey: "POSTGRES_PASSWORD"
+      remoteRef:
+        key: "SUPABASE_POSTGRES_PASSWORD"
+    - secretKey: "SUPABASE_JWT_KEYFUNC_URL"
+      remoteRef:
+        key: "SUPABASE_JWT_KEYFUNC_URL"
+    - secretKey: "GEMINI_API_KEY"
+      remoteRef:
+        key: "GEMINI_API_KEY"
+    - secretKey: "OPENAI_API_KEY"
+      remoteRef:
+        key: "OPENAI_API_KEY"
+    - secretKey: "CLAUDE_API_KEY"
+      remoteRef:
+        key: "ANTHROPIC_API_KEY"
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-cluster-issuer"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    external-dns.alpha.kubernetes.io/hostname: "llm.tinyclover.com"
+  hosts:
+    - host: llm.tinyclover.com
+      paths:
+        - path: /v1
+          pathType: Prefix
+  tls:
+    - secretName: llm-client-tls
+      hosts:
+        - llm.tinyclover.com
+
+# Custom deployment configuration for environment variables
+envFrom:
+  - secretRef:
+      name: llm-client-secret
+
+extraEnv:
+  - name: GO_ENV
+    value: "production"

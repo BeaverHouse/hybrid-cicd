@@ -13,6 +13,14 @@ spec:
             project: cloud
             valuesFile: file-manager.yaml
             cluster: cloud-k8s
+          - name: smart-manager
+            project: cloud
+            valuesFile: smart-manager.yaml
+            cluster: cloud-k8s
+          - name: llm-client
+            project: cloud
+            valuesFile: llm-client.yaml
+            cluster: cloud-k8s
   template:
     metadata:
       name: "tiny-clover-{{ .name }}"
