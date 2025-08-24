@@ -93,3 +93,5 @@ extraEnv:
     value: "production"
   - name: MCP_BASE_URL
     value: "http://smart-manager.tiny-clover.svc.cluster.local:8103/smart-manager/v1"
+  - name: MCP_TRANSPORT
+    value: "http"
