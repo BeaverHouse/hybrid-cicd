@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/beaverhouse/tinyclover-smart-manager
   pullPolicy: IfNotPresent
-  tag: "621a6663"
+  tag: "ba41dec3"
 
 imagePullSecrets:
   - name: ghcr-secret
