@@ -17,6 +17,10 @@ spec:
             project: cloud
             valuesFile: smart-manager.yaml
             cluster: cloud-k8s
+          - name: search-manager
+            project: cloud
+            valuesFile: search-manager.yaml
+            cluster: cloud-k8s
           - name: llm-client
             project: cloud
             valuesFile: llm-client.yaml
