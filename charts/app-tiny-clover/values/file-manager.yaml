@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/beaverhouse/tinyclover-file-manager
   pullPolicy: IfNotPresent
-  tag: "74bd2a57"
+  tag: "5d6b6d4f"
 
 imagePullSecrets:
   - name: ghcr-secret
