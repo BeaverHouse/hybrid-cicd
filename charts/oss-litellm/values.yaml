@@ -90,6 +90,12 @@ affinity: {}
 db:
   useExisting: true
   deployStandalone: false
+  database: postgres
+  secret:
+    name: litellm-secret
+    usernameKey: DATABASE_USERNAME
+    passwordKey: DATABASE_PASSWORD
+    endpointKey: DATABASE_HOST
 
 redis:
   enabled: false
