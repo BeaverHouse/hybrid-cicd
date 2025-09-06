@@ -33,10 +33,6 @@ spec:
         helm:
           valueFiles:
             - values/{{ .valuesFile }}
-            - ../app-tiny-clover/values/file-manager.yaml
-            - ../app-tiny-clover/values/llm-client.yaml
-            - ../app-tiny-clover/values/search-manager.yaml
-            - ../app-tiny-clover/values/smart-manager.yaml
       destination:
         name: "{{ .cluster }}"
         namespace: tiny-clover
