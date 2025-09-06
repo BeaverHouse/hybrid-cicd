@@ -6,6 +6,9 @@ metadata:
 spec:
   description: Project for Cloud K8s. (AWS, Azure, or any other cloud)
   destinations:
+    - name: oke
+      namespace: "*"
+      server: "*"
     - name: cloud-k8s
       namespace: "*"
       server: "*"
