@@ -68,6 +68,9 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ steps.org-name.outputs.org_lower }}/${{ inputs.repository }}:${{ needs.generate-sha.outputs.sha }}-amd64
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.org-name.outputs.org_lower }}/${{ inputs.repository }}:buildcache-amd64
           cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ steps.org-name.outputs.org_lower }}/${{ inputs.repository }}:buildcache-amd64,mode=max
+          build-args: |
+            TARGETARCH=amd64
+            APP_NAME=${{ inputs.repository }}
 
   build-arm64:
     runs-on: ubuntu-24.04-arm
@@ -107,6 +110,9 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ steps.org-name.outputs.org_lower }}/${{ inputs.repository }}:${{ needs.generate-sha.outputs.sha }}-arm64
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.org-name.outputs.org_lower }}/${{ inputs.repository }}:buildcache-arm64
           cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ steps.org-name.outputs.org_lower }}/${{ inputs.repository }}:buildcache-arm64,mode=max
+          build-args: |
+            TARGETARCH=arm64
+            APP_NAME=${{ inputs.repository }}
 
   create-manifest:
     runs-on: ubuntu-latest
