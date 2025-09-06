@@ -1,0 +1,11 @@
+# Vultr cluster configuration
+
+services:
+  file-manager:
+    enabled: true
+  llm-client:
+    enabled: true
+  search-manager:
+    enabled: true
+  smart-manager:
+    enabled: true

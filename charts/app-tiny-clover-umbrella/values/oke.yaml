@@ -1,0 +1,14 @@
+# OKE (Oracle Kubernetes Engine) cluster configuration
+
+services:
+  file-manager:
+    enabled: true
+  llm-client:
+    enabled: true
+  search-manager:
+    enabled: true
+  smart-manager:
+    enabled: true
+
+llm-client:
+  replicaCount: 1
