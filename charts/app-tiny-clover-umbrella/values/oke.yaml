@@ -191,7 +191,7 @@ search-manager:
   image:
     repository: ghcr.io/beaverhouse/tinyclover-search-manager
     pullPolicy: IfNotPresent
-    tag: "424b9781"
+    tag: "d2012fb5"
   imagePullSecrets:
     - name: ghcr-secret
   nameOverride: "search-manager"
@@ -283,7 +283,7 @@ smart-manager:
   image:
     repository: ghcr.io/beaverhouse/tinyclover-smart-manager
     pullPolicy: IfNotPresent
-    tag: "ba41dec3"
+    tag: "e3f711cd"
   imagePullSecrets:
     - name: ghcr-secret
   nameOverride: "smart-manager"
