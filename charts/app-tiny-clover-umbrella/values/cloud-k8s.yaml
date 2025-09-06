@@ -1,4 +1,4 @@
-# Vultr cluster configuration
+# Cloud cluster configuration
 
 services:
   file-manager:
@@ -9,3 +9,28 @@ services:
     enabled: true
   smart-manager:
     enabled: true
+
+# Add weighted routing annotations for all services
+file-manager:
+  ingress:
+    annotations:
+      external-dns.alpha.kubernetes.io/set-identifier: "cloud-cluster"
+      external-dns.alpha.kubernetes.io/aws-weight: "50"
+
+llm-client:
+  ingress:
+    annotations:
+      external-dns.alpha.kubernetes.io/set-identifier: "cloud-cluster"
+      external-dns.alpha.kubernetes.io/aws-weight: "50"
+
+search-manager:
+  ingress:
+    annotations:
+      external-dns.alpha.kubernetes.io/set-identifier: "cloud-cluster"
+      external-dns.alpha.kubernetes.io/aws-weight: "50"
+
+smart-manager:
+  ingress:
+    annotations:
+      external-dns.alpha.kubernetes.io/set-identifier: "cloud-cluster"
+      external-dns.alpha.kubernetes.io/aws-weight: "50"

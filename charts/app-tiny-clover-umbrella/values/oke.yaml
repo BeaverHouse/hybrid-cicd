@@ -10,5 +10,28 @@ services:
   smart-manager:
     enabled: true
 
+# Add weighted routing annotations for all services
+file-manager:
+  ingress:
+    annotations:
+      external-dns.alpha.kubernetes.io/set-identifier: "oke-cluster"
+      external-dns.alpha.kubernetes.io/aws-weight: "50"
+
 llm-client:
   replicaCount: 1
+  ingress:
+    annotations:
+      external-dns.alpha.kubernetes.io/set-identifier: "oke-cluster"
+      external-dns.alpha.kubernetes.io/aws-weight: "50"
+
+search-manager:
+  ingress:
+    annotations:
+      external-dns.alpha.kubernetes.io/set-identifier: "oke-cluster"
+      external-dns.alpha.kubernetes.io/aws-weight: "50"
+
+smart-manager:
+  ingress:
+    annotations:
+      external-dns.alpha.kubernetes.io/set-identifier: "oke-cluster"
+      external-dns.alpha.kubernetes.io/aws-weight: "50"
