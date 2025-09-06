@@ -26,6 +26,9 @@ spec:
               - $customRepo/charts/oss-litellm/values.yaml
         - repoURL: https://github.com/BeaverHouse/hybrid-cicd.git
           targetRevision: main
+          path: charts/oss-litellm/resources
+        - repoURL: https://github.com/BeaverHouse/hybrid-cicd.git
+          targetRevision: main
           ref: customRepo
       destination:
         name: "{{ .cluster }}"
