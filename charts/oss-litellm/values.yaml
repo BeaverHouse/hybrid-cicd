@@ -89,6 +89,7 @@ affinity: {}
 
 db:
   useExisting: true
+  deployStandalone: false
 
 redis:
   enabled: false
