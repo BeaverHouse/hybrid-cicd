@@ -99,13 +99,12 @@ file-manager:
     - name: GO_ENV
       value: "production"
 
-# llm-client subchart values  
 llm-client:
   replicaCount: 2
   image:
     repository: ghcr.io/beaverhouse/tinyclover-llm-client
     pullPolicy: IfNotPresent
-    tag: "7e1d50d4"
+    tag: "160210ab"
   imagePullSecrets:
     - name: ghcr-secret
   nameOverride: "llm-client"
