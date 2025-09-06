@@ -150,15 +150,9 @@ llm-client:
       - secretKey: "SUPABASE_JWT_KEYFUNC_URL"
         remoteRef:
           key: "SUPABASE_JWT_KEYFUNC_URL"
-      - secretKey: "GEMINI_API_KEY"
+      - secretKey: "LITELLM_API_KEY"
         remoteRef:
-          key: "GEMINI_API_KEY"
-      - secretKey: "OPENAI_API_KEY"
-        remoteRef:
-          key: "OPENAI_API_KEY"
-      - secretKey: "CLAUDE_API_KEY"
-        remoteRef:
-          key: "ANTHROPIC_API_KEY"
+          key: "LITELLM_API_KEY"
   ingress:
     enabled: true
     className: "nginx"
@@ -185,6 +179,8 @@ llm-client:
   extraEnv:
     - name: GO_ENV
       value: "production"
+    - name: LITELLM_ENDPOINT
+      value: "http://litellm.litellm.svc.cluster.local:4000"
 
 search-manager:
   replicaCount: 2
