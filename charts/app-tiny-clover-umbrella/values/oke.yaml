@@ -1,5 +1,4 @@
-# OKE cluster configuration
-# Only file-manager and llm-client enabled
+# OKE (Oracle Kubernetes Engine) cluster configuration
 
 services:
   file-manager:
@@ -7,11 +6,10 @@ services:
   llm-client:
     enabled: true
   search-manager:
-    enabled: false
+    enabled: true
   smart-manager:
-    enabled: false
+    enabled: true
 
-# file-manager subchart values for OKE
 file-manager:
   replicaCount: 1
   image:
@@ -54,25 +52,25 @@ file-manager:
     data:
       - secretKey: "POSTGRES_HOST"
         remoteRef:
-          key: "OKE_POSTGRES_HOST"
+          key: "SUPABASE_POSTGRES_HOST"
       - secretKey: "POSTGRES_USER"
         remoteRef:
-          key: "OKE_POSTGRES_USER"
+          key: "SUPABASE_POSTGRES_USER"
       - secretKey: "POSTGRES_PASSWORD"
         remoteRef:
-          key: "OKE_POSTGRES_PASSWORD"
+          key: "SUPABASE_POSTGRES_PASSWORD"
       - secretKey: "S3_ENDPOINT"
         remoteRef:
-          key: "OKE_S3_ENDPOINT"
+          key: "SUPABASE_PUBLIC_S3_ENDPOINT"
       - secretKey: "S3_ACCESS_KEY"
         remoteRef:
-          key: "OKE_S3_ACCESS_KEY"
+          key: "SUPABASE_PUBLIC_S3_ACCESS_KEY"
       - secretKey: "S3_SECRET_KEY"
         remoteRef:
-          key: "OKE_S3_SECRET_KEY"
+          key: "SUPABASE_PUBLIC_S3_SECRET_KEY"
       - secretKey: "S3_BUCKET_NAME"
         remoteRef:
-          key: "OKE_S3_BUCKET_NAME"
+          key: "SUPABASE_PUBLIC_S3_BUCKET_NAME"
   ingress:
     enabled: true
     className: "nginx"
@@ -100,7 +98,6 @@ file-manager:
     - name: GO_ENV
       value: "production"
 
-# llm-client subchart values for OKE
 llm-client:
   replicaCount: 1
   image:
@@ -143,16 +140,16 @@ llm-client:
     data:
       - secretKey: "POSTGRES_HOST"
         remoteRef:
-          key: "OKE_POSTGRES_HOST"
+          key: "SUPABASE_POSTGRES_HOST"
       - secretKey: "POSTGRES_USER"
         remoteRef:
-          key: "OKE_POSTGRES_USER"
+          key: "SUPABASE_POSTGRES_USER"
       - secretKey: "POSTGRES_PASSWORD"
         remoteRef:
-          key: "OKE_POSTGRES_PASSWORD"
+          key: "SUPABASE_POSTGRES_PASSWORD"
       - secretKey: "SUPABASE_JWT_KEYFUNC_URL"
         remoteRef:
-          key: "OKE_JWT_KEYFUNC_URL"
+          key: "SUPABASE_JWT_KEYFUNC_URL"
       - secretKey: "GEMINI_API_KEY"
         remoteRef:
           key: "GEMINI_API_KEY"
@@ -188,3 +185,178 @@ llm-client:
   extraEnv:
     - name: GO_ENV
       value: "production"
+
+search-manager:
+  replicaCount: 2
+  image:
+    repository: ghcr.io/beaverhouse/tinyclover-search-manager
+    pullPolicy: IfNotPresent
+    tag: "424b9781"
+  imagePullSecrets:
+    - name: ghcr-secret
+  nameOverride: "search-manager"
+  fullnameOverride: "search-manager"
+  serviceAccount:
+    create: false
+  service:
+    type: ClusterIP
+    api:
+      port: 8082
+    mcp:
+      enabled: true
+      port: 8102
+  resources:
+    limits:
+      cpu: 50m
+      memory: 256Mi
+    requests:
+      cpu: 10m
+      memory: 128Mi
+  autoscaling:
+    enabled: false
+  livenessProbe:
+    httpGet:
+      path: /search-manager/v1/health
+      port: api
+    periodSeconds: 120
+  readinessProbe:
+    httpGet:
+      path: /search-manager/v1/health
+      port: api
+    periodSeconds: 120
+  externalSecret:
+    enabled: true
+    data:
+      - secretKey: "POSTGRES_HOST"
+        remoteRef:
+          key: "SUPABASE_POSTGRES_HOST"
+      - secretKey: "POSTGRES_USER"
+        remoteRef:
+          key: "SUPABASE_POSTGRES_USER"
+      - secretKey: "POSTGRES_PASSWORD"
+        remoteRef:
+          key: "SUPABASE_POSTGRES_PASSWORD"
+      - secretKey: "SUPABASE_JWT_KEYFUNC_URL"
+        remoteRef:
+          key: "SUPABASE_JWT_KEYFUNC_URL"
+      - secretKey: "NAVER_CLIENT_ID"
+        remoteRef:
+          key: "NAVER_CLIENT_ID"
+      - secretKey: "NAVER_CLIENT_SECRET"
+        remoteRef:
+          key: "NAVER_CLIENT_SECRET"
+      - secretKey: "BRAVE_SEARCH_API_KEY"
+        remoteRef:
+          key: "BRAVE_SEARCH_API_KEY"
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-cluster-issuer"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+      nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+      external-dns.alpha.kubernetes.io/set-identifier: "oke-cluster"
+      external-dns.alpha.kubernetes.io/aws-weight: "50"
+    hosts:
+      - host: api.tinyclover.com
+        paths:
+          - path: /search-manager/v1
+            pathType: Prefix
+    tls:
+      - secretName: search-manager-tls
+        hosts:
+          - api.tinyclover.com
+  envFrom:
+    - secretRef:
+        name: search-manager-secret
+  extraEnv:
+    - name: GO_ENV
+      value: "production"
+    - name: MCP_BASE_URL
+      value: "http://search-manager.tiny-clover.svc.cluster.local:8102/search-manager/v1"
+    - name: MCP_TRANSPORT
+      value: "http"
+
+smart-manager:
+  replicaCount: 1
+  image:
+    repository: ghcr.io/beaverhouse/tinyclover-smart-manager
+    pullPolicy: IfNotPresent
+    tag: "ba41dec3"
+  imagePullSecrets:
+    - name: ghcr-secret
+  nameOverride: "smart-manager"
+  fullnameOverride: "smart-manager"
+  serviceAccount:
+    create: false
+  service:
+    type: ClusterIP
+    api:
+      port: 8083
+    mcp:
+      enabled: true
+      port: 8103
+  resources:
+    limits:
+      cpu: 50m
+      memory: 256Mi
+    requests:
+      cpu: 10m
+      memory: 128Mi
+  autoscaling:
+    enabled: false
+  livenessProbe:
+    httpGet:
+      path: /smart-manager/v1/health
+      port: api
+    periodSeconds: 120
+  readinessProbe:
+    httpGet:
+      path: /smart-manager/v1/health
+      port: api
+    periodSeconds: 120
+  externalSecret:
+    enabled: true
+    data:
+      - secretKey: "POSTGRES_HOST"
+        remoteRef:
+          key: "SUPABASE_POSTGRES_HOST"
+      - secretKey: "POSTGRES_USER"
+        remoteRef:
+          key: "SUPABASE_POSTGRES_USER"
+      - secretKey: "POSTGRES_PASSWORD"
+        remoteRef:
+          key: "SUPABASE_POSTGRES_PASSWORD"
+      - secretKey: "SUPABASE_JWT_KEYFUNC_URL"
+        remoteRef:
+          key: "SUPABASE_JWT_KEYFUNC_URL"
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-cluster-issuer"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+      nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+      external-dns.alpha.kubernetes.io/set-identifier: "oke-cluster"
+      external-dns.alpha.kubernetes.io/aws-weight: "50"
+    hosts:
+      - host: api.tinyclover.com
+        paths:
+          - path: /smart-manager/v1
+            pathType: Prefix
+    tls:
+      - secretName: smart-manager-tls
+        hosts:
+          - api.tinyclover.com
+  envFrom:
+    - secretRef:
+        name: smart-manager-secret
+  extraEnv:
+    - name: GO_ENV
+      value: "production"
+    - name: MCP_BASE_URL
+      value: "http://smart-manager.tiny-clover.svc.cluster.local:8103/smart-manager/v1"
+    - name: MCP_TRANSPORT
+      value: "http"
