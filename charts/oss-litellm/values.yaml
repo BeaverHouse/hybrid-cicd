@@ -69,6 +69,7 @@ proxy_config:
   general_settings:
     store_model_in_db: true
     store_prompts_in_spend_logs: true
+    database_connection_pool_limit: 10 # https://docs.litellm.ai/docs/proxy/prod
 
 resources:
   limits:
