@@ -1,9 +1,9 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/beaverhouse/litellm-database
+  repository: ghcr.io/berriai/litellm-database
   pullPolicy: IfNotPresent
-  tag: "1.76.2"
+  tag: "main-v1.76.3.rc.1"
 
 imagePullSecrets:
   - name: ghcr-secret
