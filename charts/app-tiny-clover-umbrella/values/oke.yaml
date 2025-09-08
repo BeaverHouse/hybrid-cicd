@@ -15,7 +15,7 @@ file-manager:
   image:
     repository: ghcr.io/beaverhouse/tinyclover-file-manager
     pullPolicy: IfNotPresent
-    tag: "3bb4e66b"
+    tag: "bb9df8e6"
   imagePullSecrets:
     - name: ghcr-secret
   nameOverride: "file-manager"
@@ -78,7 +78,7 @@ file-manager:
       cert-manager.io/cluster-issuer: "letsencrypt-cluster-issuer"
       nginx.ingress.kubernetes.io/ssl-redirect: "true"
       nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-      nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+      nginx.ingress.kubernetes.io/proxy-body-size: "100m"
       external-dns.alpha.kubernetes.io/hostname: "api.tinyclover.com"
       external-dns.alpha.kubernetes.io/set-identifier: "oke-cluster"
       external-dns.alpha.kubernetes.io/aws-weight: "50"
