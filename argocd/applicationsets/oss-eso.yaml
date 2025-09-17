@@ -8,9 +8,6 @@ spec:
   generators:
     - list:
         elements:
-          - name: cloud
-            project: cloud
-            cluster: cloud-k8s
           - name: oke
             project: cloud
             cluster: oke
