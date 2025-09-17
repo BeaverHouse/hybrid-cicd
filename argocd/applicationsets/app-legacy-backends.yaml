@@ -12,11 +12,11 @@ spec:
           - name: aecheck-backend
             project: cloud
             valuesFile: aecheck.yaml
-            cluster: cloud-k8s
+            cluster: oke
           - name: file-server
             project: cloud
             valuesFile: file.yaml
-            cluster: cloud-k8s
+            cluster: oke
   template:
     metadata:
       name: "{{ .name }}-legacy"
