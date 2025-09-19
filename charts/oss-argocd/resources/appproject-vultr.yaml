@@ -9,9 +9,6 @@ spec:
     - name: oke
       namespace: "*"
       server: "*"
-    - name: cloud-k8s
-      namespace: "*"
-      server: "*"
   sourceRepos:
     - "*"
   clusterResourceWhitelist:
