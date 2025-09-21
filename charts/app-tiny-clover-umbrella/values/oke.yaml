@@ -1,6 +1,8 @@
 # OKE (Oracle Kubernetes Engine) cluster configuration
 
 services:
+  ba-analyzer:
+    enabled: true
   file-manager:
     enabled: true
   llm-client:
@@ -9,6 +11,94 @@ services:
     enabled: true
   smart-manager:
     enabled: true
+
+ba-analyzer:
+  replicaCount: 2
+  image:
+    repository: ghcr.io/beaverhouse/tinyclover-ba-analyzer
+    pullPolicy: IfNotPresent
+    tag: "1563726f"
+  imagePullSecrets:
+    - name: ghcr-secret
+  nameOverride: "ba-analyzer"
+  fullnameOverride: "ba-analyzer"
+  serviceAccount:
+    create: false
+  service:
+    type: ClusterIP
+    api:
+      port: 8085
+    mcp:
+      enabled: false
+  resources:
+    limits:
+      cpu: 50m
+      memory: 256Mi
+    requests:
+      cpu: 10m
+      memory: 128Mi
+  autoscaling:
+    enabled: false
+  livenessProbe:
+    httpGet:
+      path: /ba-analyzer/v1/health
+      port: api
+    periodSeconds: 120
+  readinessProbe:
+    httpGet:
+      path: /ba-analyzer/v1/health
+      port: api
+    periodSeconds: 120
+  externalSecret:
+    enabled: true
+    data:
+      - secretKey: "POSTGRES_HOST"
+        remoteRef:
+          key: "SUPABASE_POSTGRES_HOST"
+      - secretKey: "POSTGRES_USER"
+        remoteRef:
+          key: "SUPABASE_POSTGRES_USER"
+      - secretKey: "POSTGRES_PASSWORD"
+        remoteRef:
+          key: "SUPABASE_POSTGRES_PASSWORD"
+      - secretKey: "SUPABASE_JWT_KEYFUNC_URL"
+        remoteRef:
+          key: "SUPABASE_JWT_KEYFUNC_URL"
+      - secretKey: "GEMINI_API_KEY"
+        remoteRef:
+          key: "GEMINI_API_KEY"
+      - secretKey: "YOUTUBE_API_KEY"
+        remoteRef:
+          key: "YOUTUBE_API_KEY"
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-cluster-issuer"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+      nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
+      nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+      external-dns.alpha.kubernetes.io/hostname: "api.tinyclover.com"
+      external-dns.alpha.kubernetes.io/set-identifier: "oke-cluster"
+      external-dns.alpha.kubernetes.io/aws-weight: "50"
+    hosts:
+      - host: api.tinyclover.com
+        paths:
+          - path: /ba-analyzer/v1
+            pathType: Prefix
+    tls:
+      - secretName: ba-analyzer-tls
+        hosts:
+          - api.tinyclover.com
+  envFrom:
+    - secretRef:
+        name: ba-analyzer-secret
+  extraEnv:
+    - name: GO_ENV
+      value: "production"
 
 file-manager:
   replicaCount: 1

@@ -7,6 +7,11 @@ appVersion: "0.1.0"
 
 dependencies:
   - name: app-tiny-clover
+    alias: ba-analyzer
+    version: "0.1.0"
+    repository: "file://../app-tiny-clover"
+    condition: services.ba-analyzer.enabled
+  - name: app-tiny-clover
     alias: file-manager
     version: "0.1.0"
     repository: "file://../app-tiny-clover"
