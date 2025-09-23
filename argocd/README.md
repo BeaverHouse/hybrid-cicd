@@ -9,7 +9,7 @@ There are 2 folders:
 
 ## Dependency
 
-1. Base cluster (cloud cluster)
+1. Base cluster (for operations)
    - Must install K8s >> NGINX Ingress Controller >> Argo CD
 2. `oss-argocd-config`: Argo CD Project definition
 3. `oss-eso`: Install [External Secrets Operator](https://external-secrets.io/)
