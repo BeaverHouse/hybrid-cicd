@@ -9,10 +9,6 @@ spec:
   generators:
     - list:
         elements:
-          - name: cloud-k8s
-            project: cloud
-            valuesFile: cloud-k8s.yaml
-            cluster: cloud-k8s
           - name: oke
             project: cloud
             valuesFile: oke.yaml
@@ -29,7 +25,7 @@ spec:
       source:
         repoURL: https://github.com/BeaverHouse/hybrid-cicd.git
         targetRevision: main
-        path: charts/app-tiny-clover-umbrella
+        path: charts/app-tiny-clover
         helm:
           valueFiles:
             - values/{{ .valuesFile }}

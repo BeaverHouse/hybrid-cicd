@@ -1,6 +1,33 @@
 apiVersion: v2
-appVersion: 0.1.0
-description: A Helm chart for Kubernetes
 name: app-tiny-clover
+description: Umbrella chart for tiny-clover applications
 type: application
 version: 0.1.0
+appVersion: "0.1.0"
+
+dependencies:
+  - name: app-tiny-clover
+    alias: ba-analyzer
+    version: "0.1.0"
+    repository: "file://../../backend-template"
+    condition: ba-analyzer.enabled
+  - name: app-tiny-clover
+    alias: file-manager
+    version: "0.1.0"
+    repository: "file://../../backend-template"
+    condition: file-manager.enabled
+  - name: app-tiny-clover
+    alias: llm-client
+    version: "0.1.0"
+    repository: "file://../../backend-template"
+    condition: llm-client.enabled
+  - name: app-tiny-clover
+    alias: data-aggregator
+    version: "0.1.0"
+    repository: "file://../../backend-template"
+    condition: data-aggregator.enabled
+  - name: app-tiny-clover
+    alias: life-organizer
+    version: "0.1.0"
+    repository: "file://../../backend-template"
+    condition: life-organizer.enabled

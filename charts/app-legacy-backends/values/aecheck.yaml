@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/beaverhouse/aecheck-backend
   pullPolicy: IfNotPresent
-  tag: "1.0.0-final"
+  tag: "sha-65ccc1a"
 
 imagePullSecrets:
   - name: ghcr-secret

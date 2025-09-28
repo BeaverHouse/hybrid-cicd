@@ -25,7 +25,7 @@ jobs:
         with:
           repository: ${{ env.ORGANIZATION }}/${{ inputs.repository }}
           token: ${{ secrets.GH_PAT_ORGANIZATION }}
-      
+
       - name: Get short commit SHA
         id: commit-sha
         run: echo "sha=$(git rev-parse --short=8 HEAD)" >> $GITHUB_OUTPUT
@@ -68,6 +68,8 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ steps.org-name.outputs.org_lower }}/${{ inputs.repository }}:${{ needs.generate-sha.outputs.sha }}-amd64
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.org-name.outputs.org_lower }}/${{ inputs.repository }}:buildcache-amd64
           cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ steps.org-name.outputs.org_lower }}/${{ inputs.repository }}:buildcache-amd64,mode=max
+          secrets: |
+            gitlab_token=${{ secrets.GITLAB_TOKEN }}
           build-args: |
             TARGETARCH=amd64
             APP_NAME=${{ inputs.repository }}
@@ -110,6 +112,8 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ steps.org-name.outputs.org_lower }}/${{ inputs.repository }}:${{ needs.generate-sha.outputs.sha }}-arm64
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.org-name.outputs.org_lower }}/${{ inputs.repository }}:buildcache-arm64
           cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ steps.org-name.outputs.org_lower }}/${{ inputs.repository }}:buildcache-arm64,mode=max
+          secrets: |
+            gitlab_token=${{ secrets.GITLAB_TOKEN }}
           build-args: |
             TARGETARCH=arm64
             APP_NAME=${{ inputs.repository }}

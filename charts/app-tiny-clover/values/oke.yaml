@@ -1,21 +1,102 @@
 # OKE (Oracle Kubernetes Engine) cluster configuration
 
-services:
-  file-manager:
+# Common configurations
+common-resources: &common-resources
+  limits:
+    cpu: 50m
+    memory: 256Mi
+  requests:
+    cpu: 10m
+    memory: 128Mi
+
+ba-analyzer:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ghcr.io/beaverhouse/tinyclover-ba-analyzer
+    pullPolicy: IfNotPresent
+    tag: "13ebbd3d"
+  imagePullSecrets:
+    - name: ghcr-secret
+  nameOverride: "ba-analyzer"
+  fullnameOverride: "ba-analyzer"
+  serviceAccount:
+    create: false
+  service:
+    type: ClusterIP
+    api:
+      port: 8085
+    mcp:
+      enabled: false
+  resources: *common-resources
+  livenessProbe:
+    httpGet:
+      path: /ba-analyzer/v1/health
+      port: api
+    periodSeconds: 120
+  readinessProbe:
+    httpGet:
+      path: /ba-analyzer/v1/health
+      port: api
+    periodSeconds: 120
+  externalSecret:
     enabled: true
-  llm-client:
+    data:
+      - secretKey: "POSTGRES_HOST"
+        remoteRef:
+          key: "SUPABASE_POSTGRES_HOST"
+      - secretKey: "POSTGRES_USER"
+        remoteRef:
+          key: "SUPABASE_POSTGRES_USER"
+      - secretKey: "POSTGRES_PASSWORD"
+        remoteRef:
+          key: "SUPABASE_POSTGRES_PASSWORD"
+      - secretKey: "SUPABASE_JWT_KEYFUNC_URL"
+        remoteRef:
+          key: "SUPABASE_JWT_KEYFUNC_URL"
+      - secretKey: "GEMINI_API_KEY"
+        remoteRef:
+          key: "GEMINI_API_KEY"
+      - secretKey: "YOUTUBE_API_KEY"
+        remoteRef:
+          key: "YOUTUBE_API_KEY"
+  ingress:
     enabled: true
-  search-manager:
-    enabled: true
-  smart-manager:
-    enabled: true
+    className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-cluster-issuer"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+      nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
+      nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+      external-dns.alpha.kubernetes.io/hostname: "api.tinyclover.com"
+      external-dns.alpha.kubernetes.io/set-identifier: "oke-cluster"
+      external-dns.alpha.kubernetes.io/aws-weight: "50"
+    hosts:
+      - host: api.tinyclover.com
+        paths:
+          - path: /ba-analyzer/v1
+            pathType: Prefix
+    tls:
+      - secretName: ba-analyzer-tls
+        hosts:
+          - api.tinyclover.com
+  envFrom:
+    - secretRef:
+        name: ba-analyzer-secret
+  extraEnv:
+    - name: GO_ENV
+      value: "production"
 
 file-manager:
+  enabled: true
   replicaCount: 1
   image:
     repository: ghcr.io/beaverhouse/tinyclover-file-manager
     pullPolicy: IfNotPresent
-    tag: "5d6b6d4f-arm64"
+    tag: "bb9df8e6"
   imagePullSecrets:
     - name: ghcr-secret
   nameOverride: "file-manager"
@@ -28,15 +109,7 @@ file-manager:
       port: 8082
     mcp:
       enabled: false
-  resources:
-    limits:
-      cpu: 50m
-      memory: 256Mi
-    requests:
-      cpu: 10m
-      memory: 128Mi
-  autoscaling:
-    enabled: false
+  resources: *common-resources
   livenessProbe:
     httpGet:
       path: /file-manager/v1/health
@@ -78,7 +151,10 @@ file-manager:
       cert-manager.io/cluster-issuer: "letsencrypt-cluster-issuer"
       nginx.ingress.kubernetes.io/ssl-redirect: "true"
       nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-      nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+      nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
+      nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
       external-dns.alpha.kubernetes.io/hostname: "api.tinyclover.com"
       external-dns.alpha.kubernetes.io/set-identifier: "oke-cluster"
       external-dns.alpha.kubernetes.io/aws-weight: "50"
@@ -99,11 +175,12 @@ file-manager:
       value: "production"
 
 llm-client:
+  enabled: true
   replicaCount: 1
   image:
     repository: ghcr.io/beaverhouse/tinyclover-llm-client
     pullPolicy: IfNotPresent
-    tag: "160210ab"
+    tag: "42f3b66e"
   imagePullSecrets:
     - name: ghcr-secret
   nameOverride: "llm-client"
@@ -113,18 +190,10 @@ llm-client:
   service:
     type: ClusterIP
     api:
-      port: 5050
+      port: 8080
     mcp:
       enabled: false
-  resources:
-    limits:
-      cpu: 50m
-      memory: 256Mi
-    requests:
-      cpu: 10m
-      memory: 128Mi
-  autoscaling:
-    enabled: false
+  resources: *common-resources
   livenessProbe:
     httpGet:
       path: /v1/health
@@ -150,15 +219,9 @@ llm-client:
       - secretKey: "SUPABASE_JWT_KEYFUNC_URL"
         remoteRef:
           key: "SUPABASE_JWT_KEYFUNC_URL"
-      - secretKey: "GEMINI_API_KEY"
+      - secretKey: "LITELLM_API_KEY"
         remoteRef:
-          key: "GEMINI_API_KEY"
-      - secretKey: "OPENAI_API_KEY"
-        remoteRef:
-          key: "OPENAI_API_KEY"
-      - secretKey: "CLAUDE_API_KEY"
-        remoteRef:
-          key: "ANTHROPIC_API_KEY"
+          key: "LITELLM_API_KEY"
   ingress:
     enabled: true
     className: "nginx"
@@ -185,17 +248,20 @@ llm-client:
   extraEnv:
     - name: GO_ENV
       value: "production"
+    - name: LITELLM_ENDPOINT
+      value: "http://litellm.litellm.svc.cluster.local:4000"
 
-search-manager:
+data-aggregator:
+  enabled: true
   replicaCount: 2
   image:
-    repository: ghcr.io/beaverhouse/tinyclover-search-manager
+    repository: ghcr.io/beaverhouse/tinyclover-data-aggregator
     pullPolicy: IfNotPresent
-    tag: "d2012fb5"
+    tag: "59fc13c4"
   imagePullSecrets:
     - name: ghcr-secret
-  nameOverride: "search-manager"
-  fullnameOverride: "search-manager"
+  nameOverride: "data-aggregator"
+  fullnameOverride: "data-aggregator"
   serviceAccount:
     create: false
   service:
@@ -205,23 +271,15 @@ search-manager:
     mcp:
       enabled: true
       port: 8102
-  resources:
-    limits:
-      cpu: 50m
-      memory: 256Mi
-    requests:
-      cpu: 10m
-      memory: 128Mi
-  autoscaling:
-    enabled: false
+  resources: *common-resources
   livenessProbe:
     httpGet:
-      path: /search-manager/v1/health
+      path: /data-aggregator/v1/health
       port: api
     periodSeconds: 120
   readinessProbe:
     httpGet:
-      path: /search-manager/v1/health
+      path: /data-aggregator/v1/health
       port: api
     periodSeconds: 120
   externalSecret:
@@ -261,33 +319,32 @@ search-manager:
     hosts:
       - host: api.tinyclover.com
         paths:
-          - path: /search-manager/v1
+          - path: /data-aggregator/v1
             pathType: Prefix
     tls:
-      - secretName: search-manager-tls
+      - secretName: data-aggregator-tls
         hosts:
           - api.tinyclover.com
   envFrom:
     - secretRef:
-        name: search-manager-secret
+        name: data-aggregator-secret
   extraEnv:
     - name: GO_ENV
       value: "production"
     - name: MCP_BASE_URL
-      value: "http://search-manager.tiny-clover.svc.cluster.local:8102/search-manager/v1"
-    - name: MCP_TRANSPORT
-      value: "http"
+      value: "http://data-aggregator.tiny-clover.svc.cluster.local:8102/data-aggregator/v1"
 
-smart-manager:
+life-organizer:
+  enabled: true
   replicaCount: 1
   image:
-    repository: ghcr.io/beaverhouse/tinyclover-smart-manager
+    repository: ghcr.io/beaverhouse/tinyclover-life-organizer
     pullPolicy: IfNotPresent
-    tag: "e3f711cd"
+    tag: "03de9d63"
   imagePullSecrets:
     - name: ghcr-secret
-  nameOverride: "smart-manager"
-  fullnameOverride: "smart-manager"
+  nameOverride: "life-organizer"
+  fullnameOverride: "life-organizer"
   serviceAccount:
     create: false
   service:
@@ -297,23 +354,15 @@ smart-manager:
     mcp:
       enabled: true
       port: 8103
-  resources:
-    limits:
-      cpu: 50m
-      memory: 256Mi
-    requests:
-      cpu: 10m
-      memory: 128Mi
-  autoscaling:
-    enabled: false
+  resources: *common-resources
   livenessProbe:
     httpGet:
-      path: /smart-manager/v1/health
+      path: /life-organizer/v1/health
       port: api
     periodSeconds: 120
   readinessProbe:
     httpGet:
-      path: /smart-manager/v1/health
+      path: /life-organizer/v1/health
       port: api
     periodSeconds: 120
   externalSecret:
@@ -344,19 +393,17 @@ smart-manager:
     hosts:
       - host: api.tinyclover.com
         paths:
-          - path: /smart-manager/v1
+          - path: /life-organizer/v1
             pathType: Prefix
     tls:
-      - secretName: smart-manager-tls
+      - secretName: life-organizer-tls
         hosts:
           - api.tinyclover.com
   envFrom:
     - secretRef:
-        name: smart-manager-secret
+        name: life-organizer-secret
   extraEnv:
     - name: GO_ENV
       value: "production"
     - name: MCP_BASE_URL
-      value: "http://smart-manager.tiny-clover.svc.cluster.local:8103/smart-manager/v1"
-    - name: MCP_TRANSPORT
-      value: "http"
+      value: "http://life-organizer.tiny-clover.svc.cluster.local:8103/life-organizer/v1"

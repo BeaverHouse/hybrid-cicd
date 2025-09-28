@@ -1,9 +1,9 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/beaverhouse/litellm-database
+  repository: ghcr.io/berriai/litellm-database
   pullPolicy: IfNotPresent
-  tag: "1.76.2"
+  tag: "main-v1.76.3.rc.1"
 
 imagePullSecrets:
   - name: ghcr-secret
@@ -69,6 +69,7 @@ proxy_config:
   general_settings:
     store_model_in_db: true
     store_prompts_in_spend_logs: true
+    database_connection_pool_limit: 10 # https://docs.litellm.ai/docs/proxy/prod
 
 resources:
   limits:
@@ -89,14 +90,19 @@ affinity: {}
 
 db:
   useExisting: true
+  deployStandalone: false
+  database: postgres
+  secret:
+    name: litellm-secret
+    usernameKey: DATABASE_USERNAME
+    passwordKey: DATABASE_PASSWORD
+    endpointKey: DATABASE_HOST
 
 redis:
   enabled: false
   architecture: standalone
 
 extraEnvVars:
-  - name: DATABASE_NAME
-    value: "postgres"
   - name: DATABASE_SCHEMA
     value: "litellm"
   - name: USE_PRISMA_MIGRATE
