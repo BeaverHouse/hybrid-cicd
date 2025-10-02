@@ -10,7 +10,7 @@ spec:
     targetRevision: main
     path: charts/app-jobs
   destination:
-    name: in-cluster
+    name: oke
     namespace: jobs
   syncPolicy:
     automated:
