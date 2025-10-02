@@ -10,12 +10,12 @@ spec:
         app: ba-party-analyze
     spec:
       restartPolicy: Never
+      imagePullSecrets:
+        - name: ghcr-secret
       containers:
         - name: ba-party-analyzer
           image: ghcr.io/beaverhouse/tinyclover-ba-party-analyzer:0.1.0
           imagePullPolicy: IfNotPresent
-          imagePullSecrets:
-            - name: ghcr-secret
           envFrom:
             - secretRef:
                 name: ba-party-analyze-secret
