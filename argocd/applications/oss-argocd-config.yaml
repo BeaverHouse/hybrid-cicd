@@ -9,6 +9,8 @@ spec:
     repoURL: https://github.com/BeaverHouse/hybrid-cicd.git
     targetRevision: main
     path: charts/oss-argocd/resources
+    include:
+      - "appproject-*.yaml"
   destination:
     name: in-cluster
     namespace: argo-project
