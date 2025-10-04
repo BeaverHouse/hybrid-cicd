@@ -16,4 +16,4 @@ spec:
   ipAddressPools:
     - metallb-ip-pool
   interfaces:
-    - enp0s2 # Hard-coded (bridged interface)
+    - enp0s2 # Hard-coded (Fix bridged interface to be detected)
