@@ -12,3 +12,8 @@ kind: L2Advertisement
 metadata:
   name: metallb-advertise
   namespace: metallb-system
+spec:
+  ipAddressPools:
+    - metallb-ip-pool
+  interfaces:
+    - enp0s2 # Hard-coded (bridged interface)
